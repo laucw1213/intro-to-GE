@@ -12,8 +12,8 @@
 
 ## Task 3：喺 Cloud Shell 跑一句
 ```bash
-git clone <呢個 repo 嘅 URL>
-cd <repo 資料夾>
+git clone https://github.com/laucw1213/intro-to-GE.git
+cd intro-to-GE
 ./setup.sh
 ```
 
