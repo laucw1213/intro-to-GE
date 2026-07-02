@@ -1,0 +1,10 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# OAuth secret（如有）
+client_secret*.json
+
+.DS_Store
