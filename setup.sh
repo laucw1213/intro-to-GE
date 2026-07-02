@@ -8,12 +8,30 @@
 #   2. 整 app，名 = "Cymbal Foods - Gemini Enterprise"，location = global
 #   3. Set up identity → Use Google Identity → Confirm
 #
-# 用法：  cd byo && ./setup.sh
+# 用法：  cd intro-to-GE && ./setup.sh
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 APP_NAME="Cymbal Foods - Gemini Enterprise"
 cd "$(dirname "$0")"
+
+# 0) 確保有真 terraform（Cloud Shell 可能只有個「提示安裝」shim，exit 0 會呃到人）
+if ! terraform version 2>/dev/null | grep -q "^Terraform v"; then
+  echo "▸ 未有 terraform，自動安裝落 ~/.local/bin ..."
+  TF_VER=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform \
+    | python3 -c "import sys,json;print(json.load(sys.stdin)['current_version'])" 2>/dev/null || true)
+  TF_VER="${TF_VER:-1.9.8}" # checkpoint API 攞唔到就用保底版本（>=1.5 即可）
+  curl -sLo /tmp/tf.zip "https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip"
+  mkdir -p "$HOME/.local/bin"
+  if command -v unzip >/dev/null 2>&1; then
+    unzip -o -q /tmp/tf.zip -d "$HOME/.local/bin"
+  else
+    python3 -c "import zipfile;zipfile.ZipFile('/tmp/tf.zip').extractall('$HOME/.local/bin')"
+  fi
+  chmod +x "$HOME/.local/bin/terraform"
+  export PATH="$HOME/.local/bin:$PATH" # 排喺 shim 前面
+  terraform version | head -1
+fi
 
 # 1) 自動偵測 project（lab account 得一個 project，Cloud Shell 已 set 好）
 PROJECT="${GOOGLE_CLOUD_PROJECT:-${DEVSHELL_PROJECT_ID:-$(gcloud config get-value project 2>/dev/null)}}"
