@@ -1,12 +1,13 @@
-# GE module 唔放 provider block：由 root 傳入配好 user_project_override 嘅 provider
-# （discoveryengine API 一定要 x-goog-user-project header）。
+# The GE module declares no provider block: the root passes in a provider that is
+# already configured with user_project_override (the discoveryengine API requires
+# the x-goog-user-project header).
 terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
     google = {
       source = "hashicorp/google"
-      # v7.7.0+ 先支援 Discovery Engine (Gemini Enterprise) resources
+      # v7.7.0+ is the first to support Discovery Engine (Gemini Enterprise) resources
       version = ">= 7.7.0"
     }
     null = {

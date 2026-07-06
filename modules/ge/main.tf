@@ -1,6 +1,8 @@
-# data store / collection id 嘅數字尾（對齊 Console 嘅 <slug>_<timestamp> 格式）。
-# 重要：lab grader 靠 id slug 認 data store（尤其 Cloud Storage 冇 type 欄位），
-# 一定要 <display-name-slug>_<digits>，例如 cloud-storage_1782..., google-drive_1782...
+# Numeric suffix for data store / collection ids, matching the Console's
+# <slug>_<digits> format (e.g. cloud-storage_1782...).
+# Important: the lab grader identifies a data store by its id slug (especially
+# Cloud Storage, which has no type field), so ids must be
+# <display-name-slug>_<digits>, e.g. cloud-storage_1782..., google-drive_1782...
 resource "random_string" "ds_suffix" {
   length  = 13
   upper   = false
@@ -10,14 +12,14 @@ resource "random_string" "ds_suffix" {
 }
 
 locals {
-  # engine_id：填咗就用（import 對齊現有 app），否則由 prefix 推導
+  # engine_id: use the override if set (to match an existing app for import), otherwise derive from the prefix.
   engine_id = coalesce(var.engine_id, "${var.name_prefix}-app")
 
   sfx      = random_string.ds_suffix.result
   ws_slug  = { for k, v in var.workspace_connectors : k => lower(replace(v.display_name, "/[^a-zA-Z0-9]+/", "-")) }
   gcs_slug = { for k, v in var.gcs_data_stores : k => lower(replace(v.display_name, "/[^a-zA-Z0-9]+/", "-")) }
 
-  # connector 起嘅 data store id = {collection_id}_{data_source}
+  # Data store id created by a connector = {collection_id}_{data_source}
   connector_ds_ids = var.create_connectors ? [
     for k, v in var.workspace_connectors : "${local.ws_slug[k]}_${local.sfx}_${v.data_source}"
   ] : []
@@ -25,11 +27,11 @@ locals {
   # GCS data store id
   gcs_ds_ids = [for k, v in var.gcs_data_stores : "${local.gcs_slug[k]}_${local.sfx}"]
 
-  # 全部要 attach 落 app 嘅 data store
+  # All data stores to attach to the app
   all_ds_ids = concat(local.connector_ds_ids, local.gcs_ds_ids)
 }
 
-# ── Cloud Storage (GCS) unstructured data store ──
+# -- Cloud Storage (GCS) unstructured data store --
 resource "google_discovery_engine_data_store" "gcs" {
   for_each = var.gcs_data_stores
 
@@ -41,7 +43,7 @@ resource "google_discovery_engine_data_store" "gcs" {
   content_config    = "CONTENT_REQUIRED" # unstructured documents
   solution_types    = ["SOLUTION_TYPE_SEARCH"]
 
-  # 對齊 Console「Documents」wizard 嘅 layout parser（API 預設係 digital）
+  # Match the Console "Documents" wizard's layout parser (the API default is digital).
   document_processing_config {
     default_parsing_config {
       layout_parsing_config {}
@@ -49,10 +51,11 @@ resource "google_discovery_engine_data_store" "gcs" {
   }
 }
 
-# 觸發 GCS 文件 import。Terraform 冇 native resource 做 documents:import，
-# 用 local-exec 打 API。重要：lab grader check Cloud Storage data store 要有
-# 「data ingestion / 來源」，淨係起空容器（冇 import）會 grading fail。
-# 需要本機有 gcloud（ADC token）+ curl。
+# Trigger a GCS document import. Terraform has no native resource for
+# documents:import, so we call the API via local-exec. The lab grader requires
+# the Cloud Storage data store to have data ingestion / a source; an empty
+# container (no import) fails grading.
+# Requires gcloud + curl available locally.
 resource "null_resource" "gcs_import" {
   for_each = var.gcs_data_stores
 
@@ -65,7 +68,7 @@ resource "null_resource" "gcs_import" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
       set -e
-      # Cloud Shell 用 gcloud token；我哋 test rig 用 ADC —— 兩個都 cover
+      # Cloud Shell uses the gcloud token; a local test rig uses ADC -- cover both.
       TOKEN=$(gcloud auth application-default print-access-token 2>/dev/null || gcloud auth print-access-token)
       curl -s -X POST \
         -H "Authorization: Bearer $TOKEN" \
@@ -79,10 +82,10 @@ resource "null_resource" "gcs_import" {
   depends_on = [google_discovery_engine_data_store.gcs]
 }
 
-# ── Google Workspace data connectors（Drive / Gmail / Calendar / Chat）──
-# Google-managed OAuth（zero-config）：json_params 空，唔使 client_id/secret。
-# FEDERATED：real-time、唔 copy 資料、尊重每用戶 Google Identity ACL。
-# connector 會喺 default_collection 起 data store，id = {collection_id}_{data_source}。
+# -- Google Workspace data connectors (Drive / Gmail / Calendar / Chat) --
+# Google-managed OAuth (zero-config): json_params is empty, no client_id/secret needed.
+# FEDERATED: real-time, does not copy data, respects each user's Google Identity ACL.
+# The connector creates a data store in default_collection, id = {collection_id}_{data_source}.
 resource "google_discovery_engine_data_connector" "ws" {
   for_each = var.create_connectors ? var.workspace_connectors : {}
 
@@ -101,9 +104,9 @@ resource "google_discovery_engine_data_connector" "ws" {
   }
 }
 
-# ── GE app（search engine, APP_TYPE_INTRANET）──
-# data_store_ids 將上面 connector 起嘅 data store attach 落 app，
-# 個 app 先見到 / 搜到（Console「Connected data stores」先有嘢）。
+# -- GE app (search engine, APP_TYPE_INTRANET) --
+# data_store_ids attaches the connector-created data stores to the app, so the
+# app can see / search them (the Console "Connected data stores" list is then populated).
 resource "google_discovery_engine_search_engine" "ge" {
   project       = var.project_id
   engine_id     = local.engine_id
@@ -126,7 +129,7 @@ resource "google_discovery_engine_search_engine" "ge" {
 
   knowledge_graph_config {}
 
-  # 要等 connector / GCS data store 起好先 attach
+  # Wait for the connectors / GCS data store to be created before attaching.
   depends_on = [
     google_discovery_engine_data_connector.ws,
     google_discovery_engine_data_store.gcs,

@@ -1,7 +1,7 @@
-# BYO root：現成 project 上部署 GE。無 google_project、無 kill switch。
+# BYO root: deploy GE into an existing project. No google_project, no kill switch.
 
 locals {
-  # GE 所需嘅最小 API 子集（無 billing/pubsub/function 嗰啲，因為冇 kill switch）
+  # Minimal API subset GE needs (no billing/pubsub/function APIs, since there is no kill switch).
   byo_services = [
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
@@ -11,8 +11,8 @@ locals {
   ]
 }
 
-# Enable GE 所需 API（喺現成 project 上）。
-# Lab：start trial 已 activate，可設 var.enable_apis = false 跳過。
+# Enable the APIs GE needs (on the existing project).
+# If the project is already activated (e.g. the trial has been started), set var.enable_apis = false to skip.
 resource "google_project_service" "apis" {
   for_each = var.enable_apis ? toset(local.byo_services) : toset([])
 
@@ -23,7 +23,7 @@ resource "google_project_service" "apis" {
   disable_dependent_services = false
 }
 
-# GE app + connectors（共享 module）。要等 API 開好。
+# GE app + connectors (shared module). Waits for the APIs to be enabled.
 module "ge" {
   count  = var.create_ge_app ? 1 : 0
   source = "./modules/ge"

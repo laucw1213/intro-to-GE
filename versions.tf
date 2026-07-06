@@ -22,8 +22,8 @@ provider "google" {
   region  = var.region
 }
 
-# 帶 user-project override 嘅 provider，畀 discoveryengine 用。
-# billing_project = 現成 project 本身（lab project）。
+# Provider with user-project override, required by the discoveryengine API.
+# billing_project = the existing project itself (the lab project).
 provider "google" {
   alias                 = "billing"
   project               = var.project_id

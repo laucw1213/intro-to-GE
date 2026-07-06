@@ -1,19 +1,20 @@
 output "project_id" {
-  description = "部署 GE 嘅現成 project"
+  description = "The existing project GE was deployed into."
   value       = var.project_id
 }
 
 output "ge_app_engine_id" {
-  description = "GE app (search engine) ID，create_ge_app = true 先有"
+  description = "GE app (search engine) ID; only set when create_ge_app = true."
   value       = var.create_ge_app ? module.ge[0].engine_id : null
 }
 
 output "next_step_manual" {
-  description = "Terraform 做唔到嘅手動步驟"
+  description = "Manual steps Terraform cannot do."
   value       = <<-EOT
 
-    ℹ️ 現成 project 部署 GE：billing 由 project 擁有者 / lab 負責，呢個 root 唔掂 billing。
-    如果 search engine 起唔到（subscription 錯誤），要先去 Console 啟動 GE 30-day trial：
+    Deploying GE into an existing project: billing is owned by the project owner;
+    this root does not touch billing. If the search engine fails to create
+    (subscription error), start the GE 30-day trial in the Console first:
     https://console.cloud.google.com/gen-app-builder?project=${var.project_id}
   EOT
 }
