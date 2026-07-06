@@ -6,6 +6,8 @@ Gemini Enterprise" (Cymbal Foods) lab. Run one command in the lab's Cloud Shell 
 
 > ✅ Verified end-to-end on a real lab (2026-07): both Task 2 and Task 3 "Check my progress" pass.
 
+> 📖 Participant workshop guide (full walkthrough, Steps 0–5): [`lab_guide/intro-to-GE.html`](lab_guide/intro-to-GE.html).
+
 ## Steps
 
 ### 1. Task 2 — do this by hand in the Console (Terraform / API cannot)
