@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemini Enterprise Workshop</title>
+  <meta name="description" content="Gemini Enterprise & NotebookLM Hands-on Workshop.">
+
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('mcl-theme');
+        if (saved === 'dark') document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' };</script>
+
+  <link id="md-light-css" rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-light.min.css">
+  <link id="md-dark-css" rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-dark.min.css" disabled>
+  <link id="hl-light-css" rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css">
+  <link id="hl-dark-css" rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css" disabled>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+
+  <style>
+    :root {
+      --apple-bg: #fbfbfd;
+      --apple-surface: #ffffff;
+      --apple-surface-2: #f5f5f7;
+      --apple-text: #1d1d1f;
+      --apple-text-2: #6e6e73;
+      --apple-link: #0066CC;
+      --apple-border: #d2d2d7;
+      --apple-blue: #0071e3;
+      --apple-blue-hover: #0077ED;
+      --topbar-bg: rgba(251, 251, 253, 0.72);
+    }
+    .dark {
+      --apple-bg: #000000;
+      --apple-surface: #1c1c1e;
+      --apple-surface-2: #2c2c2e;
+      --apple-text: #f5f5f7;
+      --apple-text-2: #a1a1a6;
+      --apple-link: #2997FF;
+      --apple-border: #38383a;
+      --apple-blue: #2997FF;
+      --apple-blue-hover: #5AC8FA;
+      --topbar-bg: rgba(0, 0, 0, 0.72);
+    }
+
+    html { scroll-behavior: smooth; background: var(--apple-bg); }
+    body {
+      font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont,
+        "Inter", "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--apple-bg);
+      color: var(--apple-text);
+      letter-spacing: -0.022em;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      background: var(--topbar-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--apple-border);
+    }
+    .btn-ghost {
+      padding: 8px 10px; border-radius: 8px; background: transparent;
+      border: 1px solid var(--apple-border); color: var(--apple-text);
+      cursor: pointer; transition: background 0.2s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-ghost:hover { background: var(--apple-surface-2); }
+
+    /* ===== Markdown body ===== */
+    .markdown-body {
+      background: transparent !important;
+      color: var(--apple-text) !important;
+      font-family: inherit !important;
+      font-size: 17px !important; line-height: 1.5 !important;
+      letter-spacing: -0.022em !important;
+      max-width: none !important; padding: 0 !important;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+      color: var(--apple-text) !important; border-bottom: none !important;
+    }
+    .markdown-body h1 {
+      font-size: clamp(32px, 4.5vw, 48px) !important; font-weight: 700 !important;
+      letter-spacing: -0.025em !important; line-height: 1.08 !important;
+      margin: 0 0 24px !important;
+    }
+    .markdown-body h2 {
+      font-size: clamp(24px, 3vw, 32px) !important; font-weight: 700 !important;
+      letter-spacing: -0.022em !important; line-height: 1.125 !important;
+      margin: 56px 0 20px !important; padding-bottom: 0 !important;
+    }
+    .markdown-body h3 {
+      font-size: clamp(19px, 2vw, 22px) !important; font-weight: 600 !important;
+      letter-spacing: -0.019em !important; margin: 40px 0 12px !important;
+    }
+    .markdown-body a { color: var(--apple-link) !important; text-decoration: none !important; }
+    .markdown-body a:hover { text-decoration: underline !important; }
+    .markdown-body p { margin: 0 0 16px !important; }
+    .markdown-body img {
+      max-width: 100% !important; max-height: 560px !important;
+      width: auto !important; height: auto !important;
+      display: block; border-radius: 8px; margin: 16px auto;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
+    .dark .markdown-body img { box-shadow: 0 2px 12px rgba(0,0,0,0.35); }
+    .markdown-body ul, .markdown-body ol { margin: 0 0 16px !important; padding-left: 24px !important; }
+    .markdown-body ul { list-style-type: disc !important; }
+    .markdown-body ol { list-style-type: decimal !important; }
+    .markdown-body li { margin: 6px 0 !important; }
+    .markdown-body strong { font-weight: 600 !important; }
+    .markdown-body code {
+      background: var(--apple-surface-2) !important; color: var(--apple-text) !important;
+      padding: 2px 7px !important; border-radius: 5px !important;
+      font-size: 0.9em !important;
+      font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace !important;
+    }
+    .markdown-body pre {
+      background: var(--apple-surface-2) !important; border-radius: 12px !important;
+      padding: 20px !important; margin: 20px 0 !important; overflow-x: auto;
+      position: relative;
+    }
+    .markdown-body pre code {
+      background: transparent !important; padding: 0 !important;
+      font-size: 14px !important; line-height: 1.55 !important;
+    }
+    .markdown-body blockquote {
+      border-left: 3px solid var(--apple-border) !important;
+      background: transparent !important; color: var(--apple-text-2) !important;
+      padding: 0 0 0 20px !important; margin: 24px 0 !important;
+    }
+    .markdown-body table {
+      border-collapse: separate !important; border-spacing: 0 !important;
+      margin: 24px 0 !important; border-radius: 12px !important;
+      overflow: hidden !important; border: 1px solid var(--apple-border) !important;
+      width: 100% !important; display: table !important;
+    }
+    .markdown-body th, .markdown-body td {
+      border: none !important; border-bottom: 1px solid var(--apple-border) !important;
+      padding: 12px 16px !important; background: transparent !important;
+    }
+    .markdown-body tr:last-child td { border-bottom: none !important; }
+    .markdown-body th {
+      background: var(--apple-surface-2) !important; font-weight: 600 !important; text-align: left !important;
+    }
+    .markdown-body hr {
+      border: none !important; border-top: 1px solid var(--apple-border) !important;
+      margin: 56px 0 !important; height: 1px !important; background: transparent !important;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 { scroll-margin-top: 96px; }
+
+    /* ===== Copy button on pre blocks ===== */
+    .pre-copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      padding: 5px 10px; border-radius: 6px;
+      background: var(--apple-surface); border: 1px solid var(--apple-border);
+      color: var(--apple-text-2); font-size: 12px; cursor: pointer;
+      font-family: inherit; transition: color 0.15s, background 0.15s;
+    }
+    .pre-copy-btn:hover { color: var(--apple-link); background: var(--apple-surface-2); }
+    .pre-copy-btn.copied { color: #28cd41; border-color: #28cd41; }
+
+    /* ===== TOC ===== */
+    .toc-link {
+      display: block; padding: 4px 0 4px 14px;
+      border-left: 2px solid transparent;
+      color: var(--apple-text-2); text-decoration: none;
+      font-size: 13.5px; line-height: 1.4; letter-spacing: -0.01em;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .toc-link:hover { color: var(--apple-text); }
+    .toc-link.active { color: var(--apple-link); border-left-color: var(--apple-link); font-weight: 500; }
+    .toc-panel {
+      max-height: calc(100vh - 120px); overflow-y: auto;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .toc-panel::-webkit-scrollbar { display: none; }
+
+    /* ===== Back to top ===== */
+    #back-to-top {
+      position: fixed; bottom: 28px; right: 28px; z-index: 40;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--apple-blue); color: #fff;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,113,227,0.4);
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.25s, transform 0.25s, background 0.2s;
+      pointer-events: none;
+    }
+    #back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #back-to-top:hover { background: var(--apple-blue-hover); }
+
+    /* ===== Mobile TOC FAB ===== */
+    #toc-fab {
+      position: fixed; bottom: 28px; left: 28px; z-index: 40;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 22px;
+      background: var(--apple-surface); color: var(--apple-text);
+      border: 1px solid var(--apple-border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+      cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 500;
+      transition: background 0.2s;
+    }
+    #toc-fab:hover { background: var(--apple-surface-2); }
+    .dark #toc-fab { box-shadow: 0 4px 20px rgba(0,0,0,0.45); }
+    @media (min-width: 1280px) { #toc-fab { display: none; } }
+
+    /* ===== TOC Drawer ===== */
+    #toc-overlay {
+      position: fixed; inset: 0; z-index: 45;
+      background: rgba(0,0,0,0.45);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    #toc-overlay.open { opacity: 1; pointer-events: auto; }
+    #toc-drawer {
+      position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+      width: min(300px, 85vw);
+      background: var(--apple-surface);
+      border-right: 1px solid var(--apple-border);
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+    #toc-drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--apple-border);
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--apple-text-2);
+    }
+    #drawer-close {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      background: var(--apple-surface-2); color: var(--apple-text-2);
+      cursor: pointer; font-size: 18px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #toc-mobile-nav { overflow-y: auto; flex: 1; padding: 8px 0; }
+    .toc-mobile-link {
+      display: block; padding: 10px 20px;
+      color: var(--apple-text-2); text-decoration: none;
+      font-size: 14.5px; line-height: 1.4;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-mobile-link:hover { color: var(--apple-text); background: var(--apple-surface-2); }
+    .toc-mobile-link.active { color: var(--apple-link); font-weight: 500; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ===== Topbar ===== -->
+  <header class="topbar">
+    <div class="px-5 sm:px-8 py-3 flex items-center gap-3">
+      <h1 class="text-base sm:text-lg font-semibold tracking-tight truncate" style="letter-spacing:-0.02em;">
+        Master Concept AI Academy
+      </h1>
+      <div class="ml-auto">
+        <button id="theme-btn" aria-label="Toggle theme" class="btn-ghost">
+          <svg id="icon-sun" class="w-4 h-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg id="icon-moon" class="w-4 h-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Mobile TOC FAB + Drawer ===== -->
+  <button id="toc-fab" aria-label="Contents">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="12" y2="18"/>
+    </svg>
+    Contents
+  </button>
+  <div id="toc-overlay"></div>
+  <div id="toc-drawer">
+    <div class="drawer-header">
+      <span>Contents</span>
+      <button id="drawer-close" aria-label="Close">&#215;</button>
+    </div>
+    <nav id="toc-mobile-nav"><ul id="toc-mobile-list" class="list-none m-0 p-0"></ul></nav>
+  </div>
+
+  <!-- ===== Back to top ===== -->
+  <button id="back-to-top" aria-label="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  </button>
+
+  <!-- ===== Main layout ===== -->
+  <div class="grid grid-cols-12 py-8 lg:py-12 xl:py-16">
+
+    <!-- Content -->
+    <article class="w-full max-w-7xl col-span-12 xl:col-span-10 min-w-0 px-4 sm:px-8 lg:px-14 xl:px-20 mx-auto">
+      <div id="content" class="markdown-body"></div>
+    </article>
+
+    <!-- TOC (xl only) -->
+    <aside class="hidden xl:block xl:col-span-2 xl:sticky xl:top-24 xl:self-start toc-panel px-4">
+      <div class="text-xs font-semibold uppercase tracking-wider mb-3 pl-3.5" style="color:var(--apple-text-2);">Contents</div>
+      <nav><ul id="toc-list" class="space-y-0.5 list-none m-0 p-0"></ul></nav>
+    </aside>
+  </div>
+
+  <!-- ===== Embedded lab guide content ===== -->
+  <script id="lab-content" type="text/markdown">
+
+# Introduction to Gemini Enterprise & NotebookLM
+
+> **For participants:** In this workshop you'll build your **own** Gemini Enterprise app inside a temporary Google Cloud lab project — nothing touches your own Google account, and there's nothing to pay. The heavy lifting is automated by a one-line script; you only do a few clicks. Just follow each step exactly; no technical knowledge needed.
+
+![Google Cloud Self-Paced Labs](https://cdn.qwiklabs.com/dW94pPHsWo4RxbyHDUVE7oyXDZS3QNm40RnYsQ9Mf2o%3D)
+
+## Overview
+
+**Gemini Enterprise** brings together Gemini's advanced reasoning, Google-quality search, and your enterprise data to help employees find the right information at the right time. Its AI agents can plan, reason, and execute tasks — assisting with information retrieval, summarization, task automation, data analysis, and reporting.
+
+In this workshop, you'll set up and explore your own Gemini Enterprise app loaded with data for **Cymbal Foods**, a fictional food company. You'll use the general AI assistant to search and summarize, run a multi-agent brainstorm, build a custom agent with Agent Designer, generate a deep-research report, and finally use **NotebookLM** for focused, document-grounded analysis with an audio overview.
+
+## What you will do
+
+- **Set up your own Gemini Enterprise app** — a few clicks plus one automated command.
+- **Play with Gemini Enterprise agents** — search, summarize, and brainstorm.
+- **Build a custom Sales Assistant agent** with the visual Agent Designer.
+- **Use the Deep Research agent** to generate a multi-page report.
+- **Use NotebookLM** to analyze documents and generate an audio overview.
+
+---
+
+## Step 0. Start your lab
+
+You'll work inside a temporary Google Cloud lab environment with its own **student account** and project.
+
+1. Open the classroom page: 🔗 [Introduction to Gemini Enterprise](https://hkmci.qwiklabs.com/classrooms/108) (sign in if prompted).
+
+2. On the **Labs** tab, click **Introduction to Gemini Enterprise**, then click **Start Lab**.
+
+3. The **Lab setup and access** panel (left side) shows your temporary credentials — a **Username** ending in `@qwiklabs.net` and a **Password**.
+
+4. Open an **Incognito / private browser window**, click **Open Google Cloud console**, and sign in with the lab **Username** and **Password**. (If you see "Choose an account", click **Use Another Account**.)
+
+5. Accept the terms. **Don't** add recovery options or two-factor authentication (it's a temporary account).
+
+> ⚠️ **Important:** use **only the lab student account** for everything in this workshop — Console, Google Drive, Calendar, and the Gemini Enterprise app. Your personal account will **not** see the app you build.
+>
+> ⏱️ The lab has a **90-minute timer** and cannot be paused, so keep moving through the steps.
+
+---
+
+## Step 1. Prepare your data (Google Drive & Calendar)
+
+Gemini Enterprise searches **your own** Google Drive and Calendar — meaning the **lab account's** Drive and Calendar. So first you'll copy some sample Cymbal Foods files there and add one calendar event. This takes about 5 minutes.
+
+### A. Add the Cymbal Foods files to the lab account's Google Drive
+
+1. Open this shared folder: 📁 **Gemini Enterprise Drive Assets** → [open folder](https://drive.google.com/drive/folders/1yupuyQCTE1bQamCXgjXjemUTJCLr3s_z?usp=sharing)
+
+2. Press **Ctrl+A** (Windows) / **Cmd+A** (Mac) to select all files, then right-click → **Download**. (Google Drive packs them into a `.zip`.)
+
+3. **Unzip** the download (Windows: right-click → **Extract All**; Mac: double-click). You should have these 4 files:
+
+   - `MARKETING_data.csv`
+   - `SALES_data.csv`
+   - `customer_feedback.csv`
+   - `pie_chart_customer_sentiment-png.png`
+
+4. In your **Incognito window** (signed in as the lab account), open [drive.google.com](https://drive.google.com/drive/home). Confirm the account icon (top right) shows your `student-...@qwiklabs.net` account.
+
+5. Create a folder named **`Gemini Enterprise Drive Assets`**, open it, then **drag in** the 4 files (or use **+ New → File upload**).
+
+6. Confirm your folder contains the four files:
+
+   ![Gemini Enterprise Drive Assets in Drive](https://cdn.qwiklabs.com/D9o8GIz51ibDWWElbl8KUnD2YC5X7WDxu9spBSNoltA%3D)
+
+### B. Add a Google Calendar event
+
+1. In the same Incognito window, open [calendar.google.com](https://calendar.google.com/calendar/u/0/r) (signed in as the **lab account**). Dismiss any pop-ups.
+
+2. Click **+ Create** → **Event**.
+
+3. Fill in:
+
+   - **Title:** `Cymbal Foods - Marketing Strategy Meeting`
+   - **Start time:** at least **1 hour from now**
+
+4. Click **Save**.
+
+---
+
+## Step 2. Set up your own Gemini Enterprise app
+
+Now build the app itself. Part A is a few clicks in the Console; Part B is one command that automates all the data-store plumbing for you.
+
+### A. Create the app (Console, ~2 minutes)
+
+1. In the Google Cloud Console (Incognito window), search for **Gemini Enterprise** at the top and open it.
+
+2. On the Gemini Enterprise card, click **Start 30 Day Free Trial**. If prompted to enable the Gemini Code Assist API, click **Continue** and **Activate the API**.
+
+3. On the **Create** page, set:
+
+   - **App name:** `Cymbal Foods - Gemini Enterprise`
+   - **Location:** `global`
+
+   Then click **Create**.
+
+4. Click **Set up identity** → select **Use Google Identity** → click **Confirm Workforce Identity**.
+
+### B. Connect the data stores (Cloud Shell, one command)
+
+1. Click the **Activate Cloud Shell** icon (`>_`) at the top right of the Console. Click **Continue** / **Authorize** if prompted.
+
+2. Paste this into the terminal and press Enter:
+
+   ```
+   git clone https://github.com/laucw1213/intro-to-GE.git && cd intro-to-GE && ./setup.sh
+   ```
+
+3. Wait for **`Apply complete!`** (about 2–3 minutes). The script automatically:
+
+   - installs Terraform,
+   - connects **Google Drive**, **Google Calendar**, and **Cloud Storage** data stores to your app,
+   - loads the Cymbal Foods sample documents from Cloud Storage,
+   - and enables all app features (Agent Designer, Canvas, NotebookLM, …).
+
+### C. Open your app
+
+1. Back in the Console, go to **Gemini Enterprise** → the **Overview** tab.
+
+2. Click the URL under **"Your Gemini Enterprise webapp is ready"** to open your app. Sign in with the **lab account** if prompted.
+
+3. You should land on the Gemini Enterprise home page, which looks similar to this:
+
+   ![Gemini Enterprise UI](https://cdn.qwiklabs.com/SAS693SVYzGMQAxBBCBvjaYzeCDkWugUihKZ%2FDoFpG0%3D)
+
+   On the home page you'll see a few sections:
+
+   - **Agents:** Google-provided agents (or your own) for tasks like research and idea generation.
+   - **Idea Generation:** Create a multi-agent ideation session with a team of agents.
+   - **NotebookLM:** an AI-powered research and writing assistant that works best with sources you upload.
+   - **Deep Research:** an agentic feature that can browse hundreds of websites and create multi-page reports in minutes.
+
+> ⏳ **Heads up:** Gemini Enterprise may take **5–10 minutes** to finish indexing the data. If a search returns nothing at first, wait a few minutes and try again.
+>
+> 🏅 **Bonus:** this runs inside the official Google lab — on the lab page you can click **Check my progress** for the first three checkpoints to collect points as you go.
+
+You're ready to go. 🎉
+
+---
+
+## Step 3. Interact with your Gemini Enterprise agents
+
+In this step, you'll interact directly with agents — searching across the documents, extracting specific information, summarizing content, and running a multi-agent ideation session.
+
+1. In the search bar, enter the following prompt:
+
+   ```
+   Give me an update on our latest marketing data.
+   ```
+
+2. Your answer should resemble the following:
+
+![Search Result 1](https://cdn.qwiklabs.com/0UITQ3tNCbtc9pOWWTNzbtC%2B9GKUlWHPlZtYXTxnS4k%3D)
+
+> **Note:** If no response is received, please refresh and submit the query again.
+
+3. As a follow-up, ask:
+
+   ```
+   What products were in the March newsletter?
+   ```
+
+You can use the Gemini Enterprise AI assistant to handle multimodal prompts as well.
+
+4. Click the **New chat** button on the top left corner to start a new chat.
+
+5. In the search bar, click the **Tools** button, and select **Search Company data**.
+
+6. Enter the following prompt:
+
+   ```
+   Summarize the customer sentiment pie chart.
+   ```
+
+The response should resemble the following:
+
+![pie chart summarized by AI assistant](https://cdn.qwiklabs.com/R9ZMCIFSupkulJpdl6EUBNeKAyPvLLQCbxOG%2B4BooZk%3D)
+
+> **Note:** you may need to run the query again if it doesn't find the pie chart image.
+
+7. Click the **New chat** button on the top left corner to start a new chat.
+
+8. Enter the following prompt:
+
+   ```
+   What meetings are on my agenda today? What do I need to have prepped for them?
+   ```
+
+Observe the response. Because Gemini Enterprise is connected to Google Calendar, it knows what events are coming up and can help you prepare for them!
+
+### Multi-agent ideation
+
+In this section, you'll use the Idea Generation agent to create a multi-agent ideation session for a sales presentation.
+
+1. Click the **Google Gemini Enterprise** logo to return to the homepage.
+
+2. Click **Idea Generation**.
+
+3. In the Idea Generation prompt, enter:
+
+   ```
+   Help me brainstorm a new marketing campaign for Gen-Z customers based on our latest products.
+   ```
+
+You should see a high level presentation proposal generated for you:
+
+![presentation flow for gen-z marketing campaign](https://cdn.qwiklabs.com/gIEtTfIvoGBYEaw2bApDnHM6YRRbDn5%2BjKuSszV0q8g%3D)
+
+4. Review the proposal, scroll down, and click **Start session** to start generating ideas.
+
+Your session has started and your team of AI agents is hard at work cranking out ideas! It might take a few minutes for the first ideas to be ready to view.
+
+![photo of agent ideation session](https://cdn.qwiklabs.com/EcEjP411zjDBI%2FXl8w1rYglM1%2BDq1g4X7YeBDPJHa%2FI%3D)
+
+While you wait for the ideation session to finish in the background, you can carry on with the next steps and come back to the results later.
+
+### Build a custom agent with Agent Designer
+
+In this section, you use the visual **Agent Designer** to create a custom agent tailored to your enterprise sales data.
+
+1. Click the **Google Gemini Enterprise** logo to return to the homepage.
+
+2. On the left-hand navigation menu, click **+ New Agent**.
+
+3. In the Agent Designer chat panel on the left, enter the following prompt:
+
+   ```
+   Create a Sales Assistant agent that analyzes quarterly transaction data and customer feedback.
+   ```
+
+4. Press **ENTER** to submit the request and populate the flow structure on the canvas.
+
+   ![Sales Assistant agent created on canvas](https://cdn.qwiklabs.com/VVx9S%2F1LvvWoVkHAbWaLpzWJY%2F%2BuXYtzWiJW1knYirI%3D)
+
+5. On the Flow canvas, click the **Sales Assistant** node to open the details pane.
+
+   ![Sales Assistant details pane](https://cdn.qwiklabs.com/KHG5hcvSOlZr2n5sXzVyawj3%2FOz5ZWrW6wkzxhvdzeo%3D)
+
+6. In the Details pane under **Connectors**, verify that **Cloud Storage**, **Drive**, and **Google Search** are enabled.
+
+7. At the top of the canvas, click **Preview** to test your agent.
+
+8. In the preview chat bar, enter:
+
+   ```
+   Summarize the key takeaways from our Q1 2026 sales records.
+   ```
+
+9. Inspect the generated analysis.
+
+10. At the top right of the canvas, click **Create** to publish your custom agent to your workspace.
+
+11. Click the **Google Gemini Enterprise** logo to return to the home screen.
+
+12. In the left-hand navigation panel, click **Agents**, and verify that your published **Sales Assistant** agent is listed under **Your agents**.
+
+---
+
+## Step 4. Use the Deep Research agent
+
+In this step, you'll use the Deep Research agent to unlock deep insights with AI-driven research, reports, and audio summaries.
+
+1. Click the **Google Gemini Enterprise** logo to return to the homepage.
+
+2. On the left-hand navigation menu, select **Deep Research**.
+
+3. Enter the following prompt:
+
+   ```
+   Research the latest marketing tips and tricks that food companies are using, and generate a list of actionable steps our company can take to improve our current marketing strategy.
+   ```
+
+The agent will come up with a research plan for you.
+
+4. Scroll down, and click **Start Research** to begin the task.
+
+> **Note:** since Cymbal Foods is a fictitious company, the internal data will not be real or accurate. The goal here is to show the usefulness and capabilities of the Deep Research agent.
+
+This will take a few minutes. You can wait or continue with the next step and come back later. After 5–10 minutes, your research report will be completed, with a summary and audio overview!
+
+![deep research report completed](https://cdn.qwiklabs.com/ncFzUgbLpjyO%2FkWIWJFWX0NZ689YK56g%2BTPOzeWrsoM%3D)
+
+---
+
+## Step 5. Focused analysis with NotebookLM
+
+Now you'll use **NotebookLM**, a tool designed for focused research and deep analysis on a specific set of documents. NotebookLM acts as your personal research assistant: you upload sources, then ask detailed questions, generate summaries, and synthesize information — with all answers grounded directly in the materials you provide.
+
+### A. Download your source files
+
+1. Open this shared folder: 📁 **NotebookLM Assets** → [open folder](https://drive.google.com/drive/folders/1GsXxHLq3LKyYm_r1Y67vAtAVp85HL6c5?usp=sharing)
+
+2. Select all (**Ctrl+A** / **Cmd+A**) → right-click → **Download**, then **unzip**. You should have these 3 files on your computer (e.g. on your Desktop):
+
+   - `SALES_data.txt`
+   - `customer_feedback.txt`
+   - `MARKETING_data.txt`
+
+### B. Create a Cymbal Foods analysis notebook and upload sources
+
+1. On the Gemini Enterprise home page, click **NotebookLM** on the left-hand navigation pane.
+
+2. On the NotebookLM home page, in the Link section, click **Open**, and then click **Create New Notebook**.
+
+3. The **Add sources** dialog appears:
+
+   ![NotebookLM Add Sources Dialog](https://cdn.qwiklabs.com/6bB1f23%2FJ9yq4R6GjEuXkrBLSYNh35SOqRjfxGU7Oj4%3D)
+
+4. **Add the text files as sources.** Click **Choose file** and select the three `.txt` files you just unzipped:
+
+   - `SALES_data.txt`
+   - `customer_feedback.txt`
+   - `MARKETING_data.txt`
+
+   Then wait for NotebookLM to process the sources. You should see them listed within your notebook once they're ready.
+
+![notebooklm-text-files-uploaded.png](https://cdn.qwiklabs.com/WUSdSYOrFFuTA7h7NN3HDf5qyJiEautPhvnlZ88gXog%3D)
+
+### Interacting with Your Sources in NotebookLM
+
+With your Cymbal Foods data loaded into the notebook, you can now ask targeted questions and explore the content.
+
+1. Take a moment to observe the NotebookLM interface. You'll typically see your added sources listed (often on the left side of the screen), a central area for the chat section, and a Studio section for your notes and the Audio Overview.
+
+2. **Ask Grounded Questions to NotebookLM:** In the chat input bar, type your questions. NotebookLM will generate answers based *only* on the content of the documents you've uploaded into this specific notebook. Try the following prompts:
+
+   - **Query 1:**
+     ```
+     What audience did the Spring Cookie Promotion target?
+     ```
+
+   - **Query 2:**
+     ```
+     Summarize the key themes from the customer_feedback.txt regarding products that had sales figures reported in Q1 2026 in the SALES_data.txt.
+     ```
+
+   - **Query 3:**
+     ```
+     Are there any marketing campaigns in MARKETING_data.txt that correspond to products with significant customer feedback or notable sales trends from the other documents?
+     ```
+
+   - **Query 4 (General inquiry about a single document):**
+     ```
+     What are the top 3 most frequently mentioned positive aspects in the customer_feedback.txt?
+     ```
+
+Notice how NotebookLM formulates its answers. The information is drawn directly from your uploaded text files. NotebookLM will often provide **citations** or highlight the source text used to generate an answer — look for these, as they help you verify the information and refer back to the original context. NotebookLM is designed for iterative exploration, so you can ask follow-up questions to dive deeper.
+
+A key feature of NotebookLM is the ability to save AI responses, key passages, or your own thoughts as "notes" within the notebook. (Look for options like "Add to notes" or a dedicated notes panel.)
+
+Beyond textual summaries and Q&A, NotebookLM offers an 'Audio Overview' feature — a spoken, podcast-like summary of the key insights from your sources.
+
+3. In the **Studio** section, click **Audio Overview**.
+
+![generate audio overview in notebooklm](https://cdn.qwiklabs.com/16r%2FFTh2c2ZRrOmNs6YPcqlAg8hAfCFRhKBW4K37ck4%3D)
+
+4. **Listen and Reflect:** Take a listen to the Audio Overview once it's generated. Consider how accurately it captured the main themes. Think about how this audio format could help you quickly grasp key points or review material when reading isn't convenient.
+
+### Continue Exploration (Optional)
+
+If you have time, experiment further with both tools:
+
+**In NotebookLM:**
+
+- **Different Questions:** Ask for comparisons, potential implications (based *only* on the text), or ask NotebookLM to explain a concept using examples from your documents.
+- **Note-Taking:** Save key AI responses and extract important quotes into notes.
+- **Other Features:** Look for suggested questions or different views.
+
+**In Gemini Enterprise:**
+
+- **General AI Assistant:** Try more complex queries (e.g. "Are there any marketing campaigns for products that have recent customer feedback entries, and do any align with upcoming calendar events?").
+- **Review the Gen-Z Campaign Ideas:** Revisit the **Idea Generation** session.
+- **Analyze the Deep Research Findings:** Return to the **Deep Research** report.
+- **Explore Pre-built Agents:** In the **Agents** section, try any Google-provided example agents.
+
+## Congratulations!
+
+Congratulations! You've explored Google Gemini Enterprise — interacting with agents for search and summarization, running multi-agent ideation and deep research, and performing focused document analysis with NotebookLM, even generating an audio overview. These hands-on skills are invaluable for leveraging Google's advanced AI to unlock enterprise knowledge and streamline decision-making.
+
+---
+
+### Next steps / learn more
+
+For more information about Gemini Enterprise, see:
+
+- [Gemini Enterprise Overview](https://cloud.google.com/gemini/enterprise/docs)
+- [Gemini Enterprise Quick Start](https://cloud.google.com/gemini/enterprise/docs/quickstart-gemini-enterprise)
+- [Gemini Enterprise Concepts](https://cloud.google.com/gemini/enterprise/docs/concepts)
+
+  
+
+  </script>
+
+
+  <script>
+    // ===== Theme =====
+    function setTheme(theme) {
+      const dark = theme === 'dark';
+      document.documentElement.classList.toggle('dark', dark);
+      document.getElementById('md-light-css').disabled = dark;
+      document.getElementById('md-dark-css').disabled = !dark;
+      document.getElementById('hl-light-css').disabled = dark;
+      document.getElementById('hl-dark-css').disabled = !dark;
+      try { localStorage.setItem('mcl-theme', theme); } catch (e) {}
+    }
+    setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    });
+
+    // ===== Render markdown =====
+    // Open all links in a new tab so iframe navigation is never hijacked
+    const renderer = new marked.Renderer();
+    renderer.link = function(href, title, text) {
+      // marked v5+ passes a single token object instead of (href, title, text)
+      if (href && typeof href === 'object') {
+        text  = href.text;
+        title = href.title;
+        href  = href.href;
+      }
+      const t = title ? ` title="${title}"` : '';
+      return `<a href="${href}"${t} target="_blank" rel="noopener noreferrer">${text}</a>`;
+    };
+    marked.setOptions({
+      gfm: true, breaks: false,
+      renderer: renderer,
+      highlight: function (code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try { return hljs.highlight(code, { language: lang }).value; } catch (e) {}
+        }
+        return hljs.highlightAuto(code).value;
+      }
+    });
+
+    const source = document.getElementById('lab-content').textContent;
+    const content = document.getElementById('content');
+    content.innerHTML = marked.parse(source);
+
+    // Highlight remaining code blocks
+    content.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+
+    // Copy buttons on pre blocks
+    content.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'pre-copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', () => {
+        const text = pre.querySelector('code') ? pre.querySelector('code').textContent : pre.textContent;
+        const done = () => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1400);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(done);
+        } else { done(); }
+      });
+      pre.appendChild(btn);
+    });
+
+    // ===== Mobile TOC drawer =====
+    const overlay    = document.getElementById('toc-overlay');
+    const drawer     = document.getElementById('toc-drawer');
+    const drawerClose = document.getElementById('drawer-close');
+    const tocFab     = document.getElementById('toc-fab');
+    const mobileList = document.getElementById('toc-mobile-list');
+    function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    tocFab.addEventListener('click', openDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    drawerClose.addEventListener('click', closeDrawer);
+
+    // ===== Back to top =====
+    const backBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      backBtn.classList.toggle('visible', window.scrollY > 400);
+    }, { passive: true });
+    backBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    // ===== TOC =====
+    const tocEl   = document.getElementById('toc-list');
+    const headings = content.querySelectorAll('h2');
+    const tocItems = [];
+    let isProgrammaticScroll = false;
+    let scrollTimer = null;
+    let activeID = null;
+    const linkByID = {};
+    const mobileLinkByID = {};
+
+    function setActive(id) {
+      if (id === activeID) return;
+      linkByID[activeID]?.classList.remove('active');
+      mobileLinkByID[activeID]?.classList.remove('active');
+      linkByID[id]?.classList.add('active');
+      mobileLinkByID[id]?.classList.add('active');
+      activeID = id;
+    }
+
+    function scrollToHeading(id) {
+      const target = document.getElementById(id);
+      if (!target) return;
+      setActive(id);
+      isProgrammaticScroll = true;
+      clearTimeout(scrollTimer);
+      const y = target.getBoundingClientRect().top + window.scrollY - 76;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      scrollTimer = setTimeout(() => { isProgrammaticScroll = false; }, 800);
+    }
+
+    headings.forEach((h, i) => {
+      if (!h.id) h.id = 'sec-' + i;
+
+      // Desktop TOC link
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + h.id; a.textContent = h.textContent;
+      a.dataset.target = h.id; a.className = 'toc-link';
+      a.addEventListener('click', e => { e.preventDefault(); scrollToHeading(h.id); });
+      li.appendChild(a); tocEl.appendChild(li);
+      linkByID[h.id] = a;
+
+      // Mobile TOC link
+      const mli = document.createElement('li');
+      const ma = document.createElement('a');
+      ma.href = '#' + h.id; ma.textContent = h.textContent;
+      ma.dataset.target = h.id; ma.className = 'toc-mobile-link';
+      ma.addEventListener('click', e => { e.preventDefault(); closeDrawer(); scrollToHeading(h.id); });
+      mli.appendChild(ma); mobileList.appendChild(mli);
+      mobileLinkByID[h.id] = ma;
+
+      tocItems.push({ link: a, heading: h });
+    });
+
+    if (tocItems.length) setActive(tocItems[0].heading.id);
+
+    if ('IntersectionObserver' in window && tocItems.length) {
+      const observer = new IntersectionObserver(entries => {
+        if (isProgrammaticScroll) return;
+        const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.target.offsetTop - b.target.offsetTop);
+        if (visible.length) setActive(visible[0].target.id);
+      }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+      tocItems.forEach(it => observer.observe(it.heading));
+    }
+  </script>
+</body>
+</html>
